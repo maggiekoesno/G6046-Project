@@ -4,6 +4,7 @@ public class Block{
     private boolean isSpecial;
     private boolean isEntrypoint;
     private boolean isStartpoint;
+    private boolean hasPlayer;
     private String roomName;
 
     public Block(int i, boolean r, boolean s, String n){
@@ -12,6 +13,7 @@ public class Block{
         isSpecial = s;
         isEntrypoint = false;
         isStartpoint = false;
+        hasPlayer = false;
         roomName = n;
     }
 
@@ -43,11 +45,20 @@ public class Block{
         return isStartpoint;
     }
 
+    public void setHasPlayer(boolean b){
+        hasPlayer = b;
+    }
+
+    public boolean hasPlayer(){
+        return hasPlayer;
+    }
+
     public String getRoomName(){
         return roomName;
     }
 
-    public boolean canMove(Block next){
+    public boolean canMove(int nextBlock){
+        Block next = Board.blockSearch(nextBlock);
         if(this.isRoom == next.isRoom){
             return true;
         }

@@ -12,15 +12,15 @@ public class Cluedo{
         Scanner sc = new Scanner(System.in);
         Random r = new Random();
         ArrayList<Card> deck = new ArrayList<Card>();
-        Card c;
         Role role = Role.MISS_SCARLET;
+        Card c;
         int choice;
         int i;
         int j;
         int k;
 
         c = new Card(CardType.PERSON, "Col Mustard");
-        deck.set(0,c);
+        deck.set(0, c);
         c = new Card(CardType.PERSON, "Prof Plum");
         deck.set(1,c);
         c = new Card(CardType.PERSON, "Rev Green");
@@ -108,10 +108,15 @@ public class Cluedo{
 
             switch(choice){
                 case 1: role = Role.COL_MUSTARD;
+                        break;
                 case 2: role = Role.PROF_PLUM;
+                        break; 
                 case 3: role = Role.REV_GREEN;
+                        break;
                 case 4: role = Role.MRS_PEACOCK;
+                        break;
                 case 5: role = Role.MRS_WHITE;
+                        break;
             }
 
             System.out.println("Enter 1 if someone wants to play this role");
@@ -137,9 +142,73 @@ public class Cluedo{
             j = (j+1)%numPlayers;
         }
 
-        //TODO show cards first before game?
+        for(Player p : player){
+            p.showCard();
+        }
 
         sc.close(); 
+    }
+
+    private static void checkSuggestion(String[] suggestion, int i){
+        if(suggestion == null)
+            return;
+        
+        Player p;
+        Boolean flag = false;
+        Scanner sc = new Scanner(System.in);
+        String cardToShow;
+        int j;
+        int k;
+
+        for(j=1; j<6; j++){
+            i = (i+j)%6;
+            p = player.get(i);
+
+            for(k=0; k<3; k++){
+                if(p.hasCard(suggestion[k])){
+                    if(!flag){
+                        p.printRole();
+                        System.out.print(", please pick a card to show! (Enter)");
+                        sc.nextLine();
+                    }
+                    else{
+                        System.out.print(" or ");
+                    }
+                    flag = true;
+                    System.out.print(suggestion[k]);
+                }
+            }
+            
+            if(flag){
+                System.out.println("");
+                System.out.print("Your choice: ");
+                cardToShow = sc.nextLine().strip();
+                p.printRole();
+                System.out.println(" has the card " + cardToShow);
+                break;
+            }
+        }
+        sc.close();
+    }
+
+    public static void moveSuggestedPlayer(String name, int location, String room){
+        Role r;
+
+        switch(name.toLowerCase()){
+            case "col mustard": r = Role.COL_MUSTARD;
+            case "prof plum": r = Role.PROF_PLUM;
+            case "rev green": r = Role.REV_GREEN;
+            case "mrs peacock": r = Role.MRS_PEACOCK;
+            case "miss scarlet": r = Role.MISS_SCARLET;
+            case "mrs white": r = Role.MRS_WHITE;
+            default: r = null;
+        }
+
+        for(Player p : player){
+            if(p.getRole() == r){
+                p.move(location,room);
+            }
+        }
     }
 
     public static void main(String[] args){
@@ -147,7 +216,9 @@ public class Cluedo{
 
         int i = 0;
         int moves;
+        String[] suggestion;
         Player p;
+        Boolean flag = false;
 
         while(true){
             p = player.get(i);
@@ -157,9 +228,25 @@ public class Cluedo{
 
             moves = p.roleDice();
             p.move(moves);
-            p.makeSuggestion();
-            if(p.makeAccusation())
+
+            if(Board.blockSearch(p.getLocation()).isRoom()){
+
+                suggestion = p.makeSuggestion();
+                checkSuggestion(suggestion, i);
+                
+                if(p.wantMakeAccusation())
+                    flag = p.makeAccusation(murderCards);
+            }
+
+            if(flag){
+                System.out.println("Congratulations, you solved the case!");
+                p.printRole();
+                System.out.println(", you are the winner");
+                System.out.println(murderCards[0].getCard() + " killed the victim using a " + murderCards[1].getCard() + " at the " + murderCards[2].getCard());
                 break;
+            }
         }
+
+        System.out.println("Thank you for playing!");
     }
 }
