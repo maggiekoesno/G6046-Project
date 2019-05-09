@@ -2,12 +2,38 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Random;
 
+/**
+ * Cluedo is the main class that controls the flow of the game.
+ */
 public class Cluedo{
 
+    /**
+     * Number of players in this game.
+     */
     private static int numPlayers;
-    private static ArrayList<Player> player;
+
+    /**
+     * Array List of player objects that are participating in this game.
+     */
+    private static ArrayList<Player> player = new ArrayList<Player>();
+
+    /**
+     * List of Card objects knows as the muderCards.
+     * These are the Cards the players have to figure out to win the game.
+     * There are 3 cards exactly, one from each category (i.e room, person, weapon).
+     */
     private static Card[] murderCards = new Card[3];
 
+    /**
+     * Does all the preparations before a game, which include:
+     * <ul>
+     * <li> Creation of all the cards</li>
+     * <li> Setting aside the murder cards</li>
+     * <li> Creation of the board to play on</li>
+     * <li> Creation of all the players and player setup</li>
+     * <li> Dealing the cards amongst the players</li>
+     * </ul>
+     */
     private static void setup(){
         Scanner sc = new Scanner(System.in);
         Random r = new Random();
@@ -19,65 +45,73 @@ public class Cluedo{
         int j;
         int k;
 
+        // Creation of person cards
         c = new Card(CardType.PERSON, "Col Mustard");
-        deck.set(0, c);
+        deck.add(c);
         c = new Card(CardType.PERSON, "Prof Plum");
-        deck.set(1,c);
+        deck.add(c);
         c = new Card(CardType.PERSON, "Rev Green");
-        deck.set(2,c);
+        deck.add(c);
         c = new Card(CardType.PERSON, "Mrs Peacock");
-        deck.set(3,c);
+        deck.add(c);
         c = new Card(CardType.PERSON, "Miss Scarlett");
-        deck.set(4,c);
+        deck.add(c);
         c = new Card(CardType.PERSON, "Mrs White");
-        deck.set(5,c);
+        deck.add(c);
 
+        // Picking the murderer
         i = r.nextInt(6);
         murderCards[0] = deck.get(i);
         deck.remove(i);
 
+        // Creationg of weapon cards
         c = new Card(CardType.WEAPON, "Dagger");
-        deck.set(5, c);
+        deck.add(c);
         c = new Card(CardType.WEAPON, "Candlestick");
-        deck.set(6, c);
+        deck.add(c);
         c = new Card(CardType.WEAPON, "Revolver");
-        deck.set(7, c);
+        deck.add(c);
         c = new Card(CardType.WEAPON, "Rope");
-        deck.set(8, c);
+        deck.add(c);
         c = new Card(CardType.WEAPON, "Lead Piping");
-        deck.set(9, c);
+        deck.add(c);
         c = new Card(CardType.WEAPON, "Spanner");
-        deck.set(10, c);
+        deck.add(c);
 
+        // Picking the murder weapon
         i = r.nextInt(6) + 5;
         murderCards[1] = deck.get(i);
         deck.remove(i);
 
+        // Creation of room cards
         c = new Card(CardType.ROOM, "Study");
-        deck.set(10, c);
+        deck.add(c);
         c = new Card(CardType.ROOM, "Hall");
-        deck.set(11, c);
+        deck.add(c);
         c = new Card(CardType.ROOM, "Lounge");
-        deck.set(12, c);
+        deck.add(c);
         c = new Card(CardType.ROOM, "Dining Room");
-        deck.set(13, c);
+        deck.add(c);
         c = new Card(CardType.ROOM, "Kitchen");
-        deck.set(14, c);
+        deck.add(c);  
         c = new Card(CardType.ROOM, "Ball Room");
-        deck.set(15, c);
+        deck.add(c);
         c = new Card(CardType.ROOM, "Conservatory");
-        deck.set(16, c);
+        deck.add(c);
         c = new Card(CardType.ROOM, "Billiard Room");
-        deck.set(17, c);
+        deck.add(c);
         c = new Card(CardType.ROOM, "Library");
-        deck.set(18, c);
+        deck.add(c);
         
+        // Picking the murder location
         i = r.nextInt(9) + 10;
         murderCards[2] = deck.get(i);
         deck.remove(i);
 
+        // Setting up the board
         Board.makeBoard();
 
+        // Player setup
         System.out.println("Welcome to Cluedo!");
         System.out.print("Enter number of player (2-6): ");
         numPlayers = sc.nextInt();
@@ -90,10 +124,10 @@ public class Cluedo{
         sc.nextLine();
 
         if(choice == 1){
-            player.set(0, new HumanPlayer(Role.MISS_SCARLET));
+            player.add(new HumanPlayer(Role.MISS_SCARLET));
         }
         else{
-            player.set(0, new ComputerPlayer(Role.MISS_SCARLET));
+            player.add(new ComputerPlayer(Role.MISS_SCARLET));
         }
 
         for(i=1;i<numPlayers;i++){
@@ -125,13 +159,14 @@ public class Cluedo{
             sc.nextLine();
     
             if(choice == 1){
-                player.set(i, new HumanPlayer(role));
+                player.add(new HumanPlayer(role));
             }
             else{
-                player.set(i, new ComputerPlayer(role));
+                player.add(new ComputerPlayer(role));
             }
         }
 
+        // Dealing the cards
         System.out.println("Dealing cards...");
 
         j = 0;
@@ -142,14 +177,24 @@ public class Cluedo{
             j = (j+1)%numPlayers;
         }
 
+        // Letting each player see their cards before the start of the game
         for(Player p : player){
             p.showCard();
         }
 
-        sc.close(); 
     }
 
+    /**
+     * Method to allow player to get an answer to their suggestion.
+     * After a player makes a suggestion, we check to see if the next player has one or more of the cards in the suggestion.
+     * If they do, show one of the cards to the player and method is done, if not, check the next player.
+     * Each player is checked until either at least card is found or all the other players have been checked.
+     * 
+     * @param suggestion names of cards player suggested
+     * @param i          player's turn order
+     */
     private static void checkSuggestion(String[] suggestion, int i){
+        // Check if player made a suggestion
         if(suggestion == null)
             return;
         
@@ -160,8 +205,9 @@ public class Cluedo{
         int j;
         int k;
 
-        for(j=1; j<6; j++){
-            i = (i+j)%6;
+        // Loops a maximum of the number of player - 1 because the player who made the suggestion is not included
+        for(j = 1; j < numPlayers; j++){
+            i = (i+j)%numPlayers;
             p = player.get(i);
 
             for(k=0; k<3; k++){
@@ -188,9 +234,15 @@ public class Cluedo{
                 break;
             }
         }
-        sc.close();
     }
 
+    /**
+     * Helps move suggested player to suggested room.
+     * 
+     * @param name name of player suggested
+     * @param location location block id of player who made the suggestion
+     * @param room name of room suggested
+     */
     public static void moveSuggestedPlayer(String name, int location, String room){
         Role r;
 
@@ -211,6 +263,11 @@ public class Cluedo{
         }
     }
 
+    /**
+     * Main function that will be run in the console.
+     * 
+     * @param args default parameter for main function, unused this time
+     */
     public static void main(String[] args){
         setup();
 
@@ -220,7 +277,17 @@ public class Cluedo{
         Player p;
         Boolean flag = false;
 
+        // Keeps game going until somebody wins or only one player left
         while(true){
+            if(numPlayers == 1){
+                p = player.get(0);
+                p.printRole();
+                System.out.println(", you are the last player!");
+                System.out.println("Congratulation! You win by default");
+                System.out.println(murderCards[0].getCard() + " killed the victim using a " + murderCards[1].getCard() + " at the " + murderCards[2].getCard());
+                break;
+            }
+
             p = player.get(i);
             System.out.print("It is ");
             p.printRole();
@@ -229,6 +296,7 @@ public class Cluedo{
             moves = p.roleDice();
             p.move(moves);
 
+            // Player can only make a suggestion or accusation if they are in a room
             if(Board.blockSearch(p.getLocation()).isRoom()){
 
                 suggestion = p.makeSuggestion();
@@ -236,6 +304,14 @@ public class Cluedo{
                 
                 if(p.wantMakeAccusation())
                     flag = p.makeAccusation(murderCards);
+                    if(!flag){
+                        System.out.print("Sorry ");
+                        p.printRole();
+                        System.out.println(", your accusation is incorrect!");
+                        System.out.println("You are now out of the game :(");
+                        player.remove(p);
+                        numPlayers--;
+                    }
             }
 
             if(flag){
@@ -245,6 +321,8 @@ public class Cluedo{
                 System.out.println(murderCards[0].getCard() + " killed the victim using a " + murderCards[1].getCard() + " at the " + murderCards[2].getCard());
                 break;
             }
+
+            i = (i+1) % numPlayers;
         }
 
         System.out.println("Thank you for playing!");

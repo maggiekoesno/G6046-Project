@@ -1,12 +1,36 @@
 import java.util.ArrayList;
 import java.util.Random;
 
+/**
+ * Board class represents the board used in the game.
+ * Class is final because there can only be one instance of the board in a game.
+ */
 public final class Board{
     
+    /**
+     * Array list of all the blocks that make up the board.
+     */
     private static ArrayList<Block> blockList = new ArrayList<Block>();
-    private static ArrayList<Integer> startBlock = new ArrayList<Integer>();
-    private static int count;
 
+    /**
+     * Array list of all the start block's location id.
+     * Startblocks are specific locations on the board where the players can start the game from.
+     */
+    private static ArrayList<Integer> startBlock = new ArrayList<Integer>();
+
+    /**
+     * Counter to help keep track of block id when creating blocks during creation of board.
+     * Initialized to zero.
+     */
+    private static int count = 0;
+
+    /**
+     * Create a block that is part of a room.
+     * 
+     * @param blocks       number of consecutive blocks to make
+     * @param name         name of room
+     * @param isEntryPoint true if it is connected to a door, false otherwise
+     */
     private static void roomBlock(int blocks, String name, boolean isEntryPoint){
         for(int i = 0; i < blocks; i++){
             count++;
@@ -14,6 +38,12 @@ public final class Board{
         }
     }
 
+    /**
+     * Create a block that is not part of a room.
+     * 
+     * @param blocks       number of consecutive blocks to make
+     * @param isEntryPoint true if it is connected to a door, false otherwise
+     */
     private static void outBlock(int blocks, boolean isEntryPoint){
         for(int i = 0; i < blocks; i++){
             count++;
@@ -21,22 +51,28 @@ public final class Board{
         }
     }
 
+    /**
+     * Retrieve block object based on id.
+     * 
+     * @param id id of block to search
+     * @return   block object
+     */
     public static Block blockSearch(int id){
         int max = blockList.size() - 1;
         int min = 0;
         int mid;
         int currId;
-
         while(true){
             if(max < min){
                 return null;
             }
 
-            mid = (int) max / 2;
+            mid = (int) (min+max) / 2;
             currId = blockList.get(mid).getId();
-
-            if(currId < id)
+            
+            if(currId < id){
                 min = mid + 1;
+            }
             else if(currId > id)
                 max = mid - 1;
             else if(currId == id)
@@ -44,16 +80,32 @@ public final class Board{
         }
     }
 
+    /**
+     * Method to get number of start blocks unoccupied left.
+     * 
+     * @return size of startBlock array list
+     */
     public static int getStartBlockSize(){
         return startBlock.size();
     }
 
+    /**
+     * Method to retrieve location id of a start block.
+     * Removes the start block from the array list after because
+     * we assume the block will then be occupied by a player.
+     * 
+     * @param i index number
+     * @return location id of start block
+     */
     public static int getStartBlock(int i){
         int block = startBlock.get(i);
         startBlock.remove(i);
         return block;
     }
     
+    /**
+     * Create all the blocks needed to create the board.
+     */
     public static void makeBoard(){
         Random r = new Random();
         Block block;
@@ -94,7 +146,7 @@ public final class Board{
         outBlock(3, false);
         roomBlock(1, "Lounge", true);
         roomBlock(6, "Lounge", false);
-        
+
         // Creation of 7th row
         roomBlock(6, "Library", false);
         outBlock(4, false);
@@ -155,7 +207,7 @@ public final class Board{
         outBlock(1, true);
         roomBlock(1, "Dining Room", true);
         roomBlock(7, "Dining Room", true);
-
+        
         // Creation of 14th row
         roomBlock(5, "Billiard Room", false);
         outBlock(5, false);
@@ -195,7 +247,7 @@ public final class Board{
         outBlock(4, false);
         outBlock(1, true);
         outBlock(4, false);
-
+        
         // Creation of 19th row
         outBlock(9, false);
         roomBlock(7, "Ball Room", false);
@@ -230,7 +282,7 @@ public final class Board{
         roomBlock(3, "Ball Room", false);
         outBlock(5, false);
         roomBlock(6, "Kitchen", false);
-
+        
         // Creation of 25th row
         roomBlock(6, "Conservatory", false);
         outBlock(5, false);
@@ -239,7 +291,6 @@ public final class Board{
         roomBlock(6, "Kitchen", false);
 
         // Initialize start blocks
-
         startBlock.add(18);
         startBlock.add(126);
         startBlock.add(200);
@@ -251,12 +302,12 @@ public final class Board{
             block = blockSearch(id);
             block.makeStartpoint();
         }
-
+        
         // Initialize random special blocks
         while(i>0){
             randId = r.nextInt(256)+1;
             block = blockSearch(randId);
-            if( (!(block.isEntrypoint())) && (!(block.isRoom())) && (!(block.isEntrypoint()))){
+            if( (!(block.isEntrypoint())) && (!(block.isRoom())) && (!(block.isStartpoint()))){
                 block.makeSpecial();
                 i--;
             }
