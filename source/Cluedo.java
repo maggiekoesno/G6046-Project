@@ -45,6 +45,8 @@ public class Cluedo{
         int j;
         int k;
 
+        int forFun = 5;
+
         // Creation of person cards
         c = new Card(CardType.PERSON, "Col Mustard");
         deck.add(c);
